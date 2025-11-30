@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>| Clans</title>
+
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  :root{
+    --bg-start: #0a1117;
+    --panel:#0b1420;
+    --accent1: #ff6b6b;
+    --accent2: #6be0ff;
+    --gold: #f6c358;
+    --muted: rgba(255,255,255,0.75);
+  }
+
+  body {
+    background: linear-gradient(180deg,var(--bg-start), #07101a);
+    color: #eef9ff;
+  }
+
+  .wrap { max-width: 980px; margin: 36px auto; padding: 18px; }
+
+  /* slider gier */
+  .game-slider {
+    display:flex; gap:50px; padding: 14px; overflow-x:auto; align-items:center;
+    -webkit-overflow-scrolling: touch;
+  }
+  .game-item {
+    position: relative;
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border: 2px solid rgba(255,255,255,0.04);
+    box-shadow: 0 8px 20px rgba(2,6,12,0.6);
+    overflow: hidden; /* nic nie wychodzi poza kółko */
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
+}
+
+/* .game-item .icon-wrapper {
+    width: 70%; 
+    height: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+  .game-item .label {  align-items:center; position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); font-size:13px; color: #bcd7e3; }
+  .game-item:hover { transform: translateY(-6px) scale(1.04); }
+  .game-item.active { border-color: rgba(107,224,255,0.9); box-shadow: 0 18px 40px rgba(107,224,255,0.08); transform: translateY(-8px) scale(1.06); }
+
+  .divider-line { height:4px; width:80%; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); margin: 18px auto; border-radius:3px; }
+
+  /* grid klanów */
+  .clan-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:14px; padding: 0 8px; }
+
+  .clan-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border-radius: 12px; padding: 12px; cursor:pointer;
+    border: 2px solid rgba(255,255,255,0.03);
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .clan-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,12,0.6); }
+
+  .clan-header { display:flex; gap:12px; align-items:center; }
+  .clan-avatar {
+    width:64px; height:64px; border-radius:12px; display:flex;align-items:center;justify-content:center;
+    font-size:26px; background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03);
+  }
+  .clan-title { font-size:18px; font-weight:700; color: #fff; }
+  .clan-sub { font-size:13px; color: #c7d9e6; margin-top:4px; }
+
+  .clan-stats {
+    display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;
+  }
+  .stat {
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:6px 8px; border-radius:8px; font-size:13px; color: #e9f6fb; display:flex; gap:8px; align-items:center;
+    border:1px solid rgba(255,255,255,0.025);
+  }
+  .stat i { font-size:16px; }
+
+  /* popup overlay */
+  .overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(3,8,12,0.7); z-index:999; padding:20px; }
+  .overlay.show { display:flex; }
+
+  /* popup card (klanu) */
+  .popup-card {
+    width: min(840px,98%); max-width: 940px;
+    background: linear-gradient(180deg,#0d2030,#0b1624);
+    border-radius:14px; padding:18px; color: #eef9ff;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7); position:relative;
+    border: 2px solid rgba(255,255,255,0.03);
+    animation: popupIn .18s cubic-bezier(.2,.9,.2,1);
+  }
+  @keyframes popupIn { from { transform: translateY(18px) scale(.98); opacity:0 } to { transform: translateY(0) scale(1); opacity:1 } }
+
+  .popup-top { display:flex; gap:18px; align-items:flex-start; }
+  .popup-avatar { width:92px; height:92px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:36px; background: linear-gradient(135deg,#ff8a8a,#a6eeff); border: 2px solid rgba(255,255,255,0.06); }
+  .popup-info { flex:1; text-align:left; }
+  .popup-info h2 { margin:0; font-size:22px; }
+  .popup-info p { color: #bcd7e3; margin:6px 0 12px; }
+
+  .popup-stats { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
+  .popup-stat { background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:8px 10px; border-radius:10px; display:flex; gap:8px; align-items:center; border:1px solid rgba(255,255,255,0.025); font-size:13px; color:#eaf9ff; }
+
+  .members-list { margin-top:14px; display:flex; flex-direction:column; gap:8px; max-height:360px; overflow:auto; padding-right:8px; margin-bottom:6px; }
+
+  .member-row {
+    display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.02); cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .member-row:hover { transform: translateY(-4px); }
+
+  .member-avatar { width:52px; height:52px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; background: linear-gradient(135deg,#ffd8a8,#d3f7ff); border:1px solid rgba(255,255,255,0.04); }
+
+  .member-meta { flex:1; text-align:left; }
+  .member-meta .m-name { font-weight:700; display:flex; align-items:center; gap:6px; }
+  .member-meta .m-sub { font-size:13px; color:#bcd7e3; margin-top:2px; }
+
+  .member-rank { font-weight:700; color:var(--gold); margin-left:8px; }
+
+  .member-role { font-size:16px; }
+
+  .member-trophy { font-weight:700; color:#cfeefb; }
+
+  .popup-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+
+  .btn {
+    padding:8px 12px; border-radius:10px; cursor:pointer; border: none; font-weight:700; background: rgba(255,255,255,0.06);
+    color: #fff; transition: transform .12s ease, background .12s ease;
+  }
+  .btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.09); }
+
+  .btn-apply { background: linear-gradient(90deg,#ff9b6b,#6be0ff); color: #04202a; font-weight:800; }
+
+  /* member popup */
+  .member-popup {
+    width: 420px; max-width:96%; background: linear-gradient(180deg,#061422,#071a28); padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 24px 60px rgba(2,6,12,0.7);
+  }
+  .member-popup h3 { margin:0; }
+  .member-popup p { color: #c2e6f2; margin-top:8px; }
+
+  /* close btn */
+  .close-x { position:absolute; right:14px; top:12px; font-size:26px; cursor:pointer; color: #cfeefb; opacity:0.9; }
+
+  /* responsive */
+  @media (max-width:720px){
+    .popup-top { flex-direction:column; align-items:center; text-align:center; }
+    .popup-info { text-align:center; }
+    .game-item { width:64px; height:64px; font-size:26px;}
+  }
+   .game-item img.icon1 {
+    max-width: 100%;
+    height:auto;
+    max-height: 100%;
+    object-fit: contain; /* zachowuje proporcje */
+    display: block;
+}
+  
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <nav class="menu">
+    <a href="../../index.html">Home</a>
+    <a href="clans.html">Clans</a>
+    <a href="https://discord.gg/empiresgaming" target="_blank"><i class="fa-brands fa-discord" style="font-size: 32px; margin-right: 8px; color: blue"></i><span style="color:blue;">Discord</span></a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <h1 style="text-align:center;margin-bottom:8px;">Clans — Showcase</h1>
+
+  <div class="game-slider" id="gameSlider">
+    <div class="game-item active" data-game="rush">
+    
+      <img class="icon1" src="../../img/logos/rushlogo.png" />
+    
+      <div class="label">Rush</div>
+    </div>
+    <div class="game-item" data-game="mc">
+      <span class="icon">⛏️</span>
+      <div class="label">Minecraft</div>
+    </div>
+    <div class="game-item" data-game="fn">
+      <span class="icon">🔫</span>
+      <div class="label">Fortnite</div>
+    </div>
+    <div class="game-item" data-game="valo">
+      <span class="icon">⚡</span>
+      <div class="label">Valorant</div>
+    </div>
+  </div>
+
+  <div class="divider-line"></div>
+
+  <!-- GRID: default shows rush -->
+  <div class="clan-grid" id="rushGrid">
+    <div class="clan-card" data-clan="rush-eu">
+      <div class="clan-header">
+        <div class="clan-avatar">🏹</div>
+        <div>
+          <div class="clan-title">Ēmpires United</div>
+          <div class="clan-sub">We are empires. Req: 4000 trophies • Apply on Discord</div>
+        </div>
+      </div>
+      <div class="clan-stats">
+        <div class="stat"><i class="fa-solid fa-trophy"></i> 307.3k</div>
+        <div class="stat"><i class="fa-solid fa-users"></i> 48/50</div>
+        <div class="stat"><i class="fa-solid fa-crosshairs"></i> PvP</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutaj inne gridy mc, fn, valo takie jak w Twoim kodzie -->
+
+</div>
+
+<!-- CLAN POPUP -->
+<div id="clanOverlay" class="overlay" aria-hidden="true">
+  <div class="popup-card" role="dialog" aria-modal="true">
+    <div class="close-x" id="closeClan">&times;</div>
+    <div class="popup-top">
+      <div class="popup-avatar" id="popupAvatar">🏹</div>
+      <div class="popup-info">
+        <h2 id="popupName">Clan Name</h2>
+        <p id="popupDesc">Short description of the clan. Requirements, activity, links.</p>
+
+        <div class="popup-stats">
+          <div class="popup-stat"><i class="fa-solid fa-trophy"></i><span id="s-trophies">135</span></div>
+          <div class="popup-stat"><i class="fa-solid fa-users"></i><span id="s-members">48/50</span></div>
+          <div class="popup-stat"><i class="fa-solid fa-chess-rook"></i><span id="s-type">Clan Wars</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px;margin-bottom:8px;">Players</h3>
+    <div class="members-list" id="popupMembers">
+      <!-- members added dynamically -->
+    </div>
+
+    <div class="popup-actions">
+      <button class="btn" id="btnCloseClan">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER POPUP -->
+<div id="memberOverlay" class="overlay" aria-hidden="true">
+  <div class="member-popup" role="dialog" aria-modal="true">
+    <div class="close-x" id="closeMember">&times;</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#ffd8a8,#d3f7ff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;" id="memberAvatar">NN</div>
+      <div>
+        <h3 id="memberName">Member</h3>
+        <div style="color:#bcd7e3;font-size:13px;" id="memberRank">Trophies: <span style="color:yellow">0</span></div>
+        <div style="color:#bcd7e3;font-size:13px;" id="memberRole">Role: </div>
+        <div style="color:#bcd7e3;font-size:13px;" id="memberCrit">Crit: </div>
+        <div style ="color: bcd7e3;font-size:13px;" id="memberStats">Stats: </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn" id="btnCloseMember">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --- sample data --- */
+const clanData = {
+  "rush-eu": {
+    id:"rush-eu",
+    name: "Ēmpires United",
+    avatar: "🏹",
+    desc: "We are empires. Requirements 4000 trophies and all clan war quests. Apply on discord.",
+    stats: { trophies: "307.3k", members: "48/50", type: "PvP" },
+    members: [
+      { name:"TUBEФPERFECT", rank: 4151, role:"Leader", status:"online", trophy: 4251 , crit: 3223, stats:"Maximum Trophies\n Current Season 65: 4177\n Last Season 64: <span style='color:lightblue'>Contender I 7214</span>\n Best Season 56: <span style='color: yellow'>Champion II 8389</span>"},
+      { name: "H0cuS P0cuS", rank: 4575, role: "First Mate", status: "online", trophy: 4575, crit: 2258, stats: "Maximum Trophies\n Current Season 65: 4416\n Last Season 64: <span style='color: yellow'>Champion III 8885</span>\n Best Season 64: <span style='color: yellow'> Champion III 8885</span>" },
+      { name: "Dubz77", rank: 4000, role: "Officer", status: "online", trophy: 4000, crit: 4202, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender III 7718</span>\n Best Season 62: <span style='color: yellow'>Champion I 8106</span>" },
+      { name: ".kmay", rank: 4000, role: "Officer", status: "online", trophy: 4000, crit: 2128, stats: "Maximmum Trophies\n Current Season 65: 4000\n Last Season 64: 5590\n Best Season 56: <span style='color: lightblue'>Contender I 7124</span>" },
+      { name: "OtakuDace", rank: 4145, role: "Officer", status: "online", trophy: 4103, crit: 2169, stats: "Maximum Trophies\n Current Season 65: 4145\n Last Season 64: <span style='color: lightblue'>Contender II 7478</span>\n Best Season 64: <span style='color: lightblue'>Contender II 7478</span>" },
+      { name: "Jim the Vampire", rank: 4000, role: "Officer", status: "online", trophy: 4000, crit: 1504, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7004</span>\n Best Season 64: <span style='color: lightblue'>Contender I 7004</span>" },
+      { name: "Left Newd", rank: 4000, role: "Officer", status: "online", trophy: 4000, crit: 3551, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7026</span>\n Best Season 64: <span style='color: lightblue'>Contender I 7026</span>" },
+      { name: "BS-giannelis", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2364, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 5551\n Best Season 16: 5750" },
+      { name: "疟 JormuFer", rank: 4123, role: "Member", status: "online", trophy: 4123, crit: 3353, stats: "Maximum Trophies\n Current Season 65: 4123\n Last Season 64: 6563\n Best Season 48: <span style='color: lightblue'>Contender I 7085</span>" },
+      { name: "Player44791714", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1534, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6113\n Best Season 48: <span style='color: lightblue'>Contender I 7214</span>" },
+      { name: "chibbo", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2016, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 5856\n Best Season 48: <span style='color: lightblue'>Contender I 77248</span>" },
+      { name: "xShadowF1W TTV", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 5854, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7064</span>\n Best Season 56: <span style='color: yellow'>Champion I 8298</span>" },
+      { name: "Carn1491", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2635, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6825\n Best Season 48: <span style='color: lightblue'>Contender III 7625</span>" },
+      { name: "RogueW0lf", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 4001, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6825\n Best Season 48: <span style='color: yellow'>Champion I 8001</span>" },
+      { name: "疟 sloppychoppy", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 3574, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender II 7372</span>\n Best Season 48: <span style='color: yellow'>Champion II 8476</span>" },
+      { name: "Gacha_Skill", rank: 4000, role: "Member", status: "online", trophy: 4010, crit: 1220, stats: "Maximum Trophies\n Current Season 65: 4010\n Last Season 64: 4504\n Best Season 62: 5108" },
+      { name: "Kaash4", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1957, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender II 7481</span>\n Best Season 64: <span style='color: lightblue'>Contender II 7481</span>" },
+      { name: "artekspoko", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2698, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 5544\n Best Season 50: <span style='color: lightblue'>Contender III 7711</span>" },
+      { name: "Player98218352", rank: 4000, role: "Member", status: "online", trophy: 4264, crit: 1534, stats: "Maximum Trophies\n Current Season 65: 4291\n Last Season 64: 6151\n Best Season 64: 6151" },
+      { name: "Joker_1000-7", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2169, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6379\n Best Season 47: <span style='color: lightblue'>Contender I 7035</span>" },
+      { name: "doc8408", rank: 4000, role: "Member", status: "online", trophy: 4056, crit: 5100, stats: "Maximum Trophies\n Current Season 65: 4065\n Last Season 64:  <span style='color: lightblue'>Contender III 7696</span>\n Best Season 57: <span style='color: yellow'>Champion I 8027</span>" },
+      { name: "IsotopeX", rank: 4000, role: "Member", status: "online", trophy: 4010, crit: 1745, stats: "Maximum Trophies\n Current Season 65: 4010\n Last Season 64: <span style='color: lightblue'>Contender II 7597</span>\n Best Season 64: <span style='color: lightblue'>Contender II 7597</span>" },
+      { name: "KillerKennyB", rank: 4000, role: "Member", status: "online", trophy: 4044, crit: 2276, stats: "Maximum Trophies\n Current Season 65: 4044\n Last Season 64: 4786\n Best Season 50: 5469" },
+      { name: "Marto90", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2490, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6844\n Best Season 64: 6844" },
+      { name: "LegitFinn", rank: 4000, role: "Member", status: "online", trophy: 4020, crit: 1590, stats: "Maximum Trophies\n Current Season 65: 4020\n Last Season 64: 6704\n Best Season 63: 6732" },
+      { name: "CapNChronic", rank: 4000, role: "Member", status: "online", trophy: 4157, crit: 3270, stats: "Maximum Trophies\n Current Season 65: 4157\n Last Season 64: 6087\n Best Season 50: <span style='color: yellow'>Champion I 8140</span>" },
+      { name: "K Blanco", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1742, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6193\n Best Season 63: 6193" },
+      { name: "K!LLER4U", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1784, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6448\n Best Season 63: 6704" },
+      { name: "Axoustic", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2026, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6102\n Best Season 63: 6737" },
+      { name: "NemGem", rank: 4000, role: "Member", status: "online", trophy: 4190, crit: 2243, stats: "Maximum Trophies\n Current Season 65: 4190\n Last Season 64: <span style='color: lightblue'>Contender II 7555</span>\n Best Season 63: <span style='color: lightblue'>Contender III 7706</span>" },
+      { name: "Player19693948", rank: 4000, role: "Member", status: "online", trophy: 4462, crit: 1355, stats: "Maximum Trophies\n Current Season 65: 4462\n Last Season 64: 5817\n Best Season 51: 6658" },
+      { name: "KTN99BG", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 3091, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 6702\n Best Season 56: <span style='color: lightblue'>Contender III 7827</span>" },
+      { name: "Quarth69", rank: 4000, role: "Member", status: "online", trophy: 4096, crit: 1459, stats: "Maximum Trophies\n Current Season 65: 4096\n Last Season 64: 6364\n Best Season 63: 6631" },
+      { name: "Kevballs", rank: 4000, role: "Member", status: "online", trophy: 4010, crit: 1788, stats: "Maximum Trophies\n Current Season 65: 4010\n Last Season 64: 5208\n Best Season 61: 5743" },
+      { name: "DaanRoel", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2671, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7256</span>\n Best Season 56: <span style='color: lightblue'>Contender III 7868</span>" },
+      { name: "Ebo2k", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1754, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 4785\n Best Season 61: 6025" },
+      { name: "Masterj687", rank: 4000, role: "Member", status: "online", trophy: 4010, crit: 4302, stats: "Maximum Trophies\n Current Season 65: 4010\n Last Season 64: <span style='color: lightblue'>Contender I 7080</span>\n Best Season 48: <span style='color: lightblue'>Contender III 7664</span>" },
+      { name: "Mr_Wari", rank: 4000, role: "Member", status: "online", trophy: 4267, crit: 1818, stats: "Maximum Trophies\n Current Season 65: 4267\n Last Season 64: 6980\n Best Season 65: 6980" },
+      { name: "疟 xtz", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2264, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 5841\n Best Season 48: <span style='color: lightblue'>Contender II 7380</span>" },
+      { name: "TheClobbers", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2287, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender III 7723</span>\n Best Season 64: <span style='color: lightblue'>Contender III 7723</span>" },
+      { name: "Ťhe ŲnKnøwń", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 931, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: 5614\n Best Season 64: 5614" },
+      { name: "SPARKZ", rank: 4000, role: "Member", status: "online", trophy: 4257, crit: 1599, stats: "Maximum Trophies\n Current Season 65: 4257\n Last Season 64: 6462\n Best Season 64:" },
+      { name: "Jason0424", rank: 4000, role: "Member", status: "online", trophy: 4343, crit: 1922, stats: "Maximum Trophies\n Current Season 65: 4343\n Last Season 64: 6777\n Best Season 64: 6777" },
+      { name: "qSyder02", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 2358, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7112</span>\n Best Season 64: <span style='color: lightblue'>Contender I 7112</span>" },
+      { name: "Thisgamesrigged", rank: 4000, role: "Member", status: "online", trophy: 4460, crit: 2425, stats: "Maximum Trophies\n Current Season 65: 4460\n Last Season 64: <span style='color: yellow'> Champion I 8023</span>\n Best Season 64: <span style='color: yellow'>Champion I 8023</span>" },
+      { name: "JakeTheK", rank: 4000, role: "Member", status: "online", trophy: 4000, crit: 1971, stats: "Maximum Trophies\n Current Season 65: 4000\n Last Season 64: <span style='color: lightblue'>Contender I 7034</span>\n Best Season 62: <span style='color: lightblue'>Contender I 7294</span>" },
+      { name: "ETSLAYER", rank: 4000, role: "Member", status: "online", trophy: 4134, crit: 2926, stats: "Maximum Trophies\n Current Season 65: 4134\n Last Season 64: 6304\n Best Season 56: 6662" },
+      { name: "Player62420289", rank: 4000, role: "Member", status: "online", trophy: 4172, crit: 2477, stats: "Maximum Trophies\n Current Season 65: 4172\n Last Season 64: 6326\n Best Season 48: <span style='color: lightblue'>Contender II 7574</span>" },
+      { name: "Elyon", rank: 4000, role: "Member", status: "online", trophy: 4223, crit: 1494, stats: "Maximum Trophies\n Current Season 65: 4223\n Last Season 64: 6314\n Best Season 64: 6314" },
+      { name: "OSKWITCH", rank: 4000, role: "Member", status: "online", trophy: 4186, crit: 3903, stats: "Maximum Trophies\n Current Season 65: 4186\n Last Season 64: <span style='color: lightblue'>Contender II 7335</span>\n Best Season 64: <span style='color: lightblue'>Contender II 7335</span>" }
+    ]
+},
+}
+
+/* --- role icons --- */
+const roleIcons = {
+  "Leader": "👑",
+  "First Mate": "⚓",
+  "Officer": "🛡️"
+};
+
+/* --- game selector --- */
+const gameMap = {
+  rush: "rushGrid",
+  mc: "mcGrid",
+  fn: "fnGrid",
+  valo: "valoGrid"
+};
+
+document.querySelectorAll('.game-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.game-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const game = item.dataset.game;
+    Object.values(gameMap).forEach(id=>document.getElementById(id)?.style.setProperty('display','none'));
+    document.getElementById(gameMap[game])?.style.setProperty('display','grid');
+  });
+});
+
+/* --- popup functions --- */
+const clanOverlay = document.getElementById('clanOverlay');
+const memberOverlay = document.getElementById('memberOverlay');
+
+function showOverlay(overlay){ overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); }
+function hideOverlay(overlay){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); }
+
+document.getElementById('closeClan').addEventListener('click', ()=>hideOverlay(clanOverlay));
+document.getElementById('btnCloseClan').addEventListener('click', ()=>hideOverlay(clanOverlay));
+
+document.getElementById('closeMember').addEventListener('click', ()=>hideOverlay(memberOverlay));
+document.getElementById('btnCloseMember').addEventListener('click', ()=>hideOverlay(memberOverlay));
+
+/* --- open clan popup --- */
+function openClanPopup(id){
+  const data = clanData[id];
+  if(!data) return;
+
+  document.getElementById('popupName').textContent = data.name;
+  document.getElementById('popupDesc').textContent = data.desc;
+  document.getElementById('popupAvatar').textContent = data.avatar;
+  document.getElementById('s-trophies').textContent = data.stats.trophies;
+  document.getElementById('s-members').textContent = data.stats.members;
+  document.getElementById('s-type').textContent = data.stats.type;
+
+  const membersDiv = document.getElementById('popupMembers');
+  membersDiv.innerHTML = '';
+  data.members.forEach((m,i)=>{
+    const row = document.createElement('div');
+    row.className = 'member-row';
+
+    const roleIcon = m.role && roleIcons[m.role] ? `<span class="member-role">${roleIcons[m.role]}</span>` : '';
+    row.innerHTML = `
+      <div class="member-avatar">${(m.name.split(' ')[0]||m.name).slice(0,2)}</div>
+      <div class="member-meta">
+        <div class="m-name">${m.name} ${roleIcon}</div>
+        <div class="m-sub">${m.role||''}</div>
+      </div>
+      <div class="member-trophy"><i class="fa-solid fa-trophy"></i> ${m.trophy}</div>
+    `;
+    row.addEventListener('click', ()=>openMemberPopup(id,i));
+    membersDiv.appendChild(row);
+  });
+
+  showOverlay(clanOverlay);
+}
+
+/* --- open member popup --- */
+function openMemberPopup(clanId, memberIndex){
+  const data = clanData[clanId];
+  if(!data) return;
+  const m = data.members[memberIndex];
+
+  document.getElementById('memberName').textContent = m.name;
+  document.getElementById('memberAvatar').textContent = (m.name.split(' ')[0]||m.name).slice(0,2);
+  document.getElementById('memberRank').textContent = `Trophies: ${m.trophy}`;
+  document.getElementById('memberRole').textContent = `Role: ${m.role || 'Member'}`;
+  document.getElementById('memberCrit').textContent = `Crit: ${m.crit || 0}`;
+  document.getElementById('memberStats').innerHTML = `Stats:<br>${(m.stats || 'N/A').replace(/\n/g, '<br>')}`;
+
+  showOverlay(memberOverlay);
+}
+
+/* --- attach open popup for cards --- */
+document.querySelectorAll('.clan-card').forEach(card=>{
+  const id = card.dataset.clan;
+  card.addEventListener('click', ()=>openClanPopup(id));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>| About us</title>
+</head>
+<body>
+    
+    <div id="menu">
+    <nav class="menu">
+        <a href="../../index.html">Home</a>
+        <a href="clans.html">Clans</a>
+        <a href="https://discord.gg/empiresgaming" target="_blank"><i class="fa-brands fa-discord" style="font-size: 32px; margin-right: 8px; color: blue"></i><span style="color:blue;">Discord</span></a>
+    </nav>
+</div>
+
+    <div class="name">
+        <h1 id="name"></h1>
+    </div>
+
+    <div class="about">
+
+        <h2 class="mainrsn">Who are we?</h2>
+        <p>疟mpires is a gaming community focused on building a friendly and active group of players who enjoy playing together. Our main focus is on game called Rush Royale, but we also welcome players from other games.</p><br>
+
+        <h2 class="mainrsn">Our Mission</h2>
+        <p>Our mission is to create a welcoming environment where gamers can connect, share strategies, and have fun. We aim to foster teamwork, sportsmanship, and a sense of belonging among our members.</p><br>
+
+        <h2 class="mainrsn">Join Us!</h2>
+        <p>If you're interested in joining our community, feel free to reach out to us on our Discord server. We look forward to gaming with you!</p>
+
+    </div>
+
+</body>
+</html>
+
+<script>
+    const text = "疟mpires Gaming Community";
+    let i = 0;
+
+    const line1 = document.getElementById("name");
+
+    function typeLine1() {
+        if (i < text.length) {
+            line1.textContent += text.charAt(i);
+            i++;
+            setTimeout(typeLine1, 80);
+        }
+    }
+
+    typeLine1();
+</script>

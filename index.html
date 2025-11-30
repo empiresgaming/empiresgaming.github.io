@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <title>疟mpire</title>
+</head>
+<body>
+    <!-- <div class="BG"></div> -->
+<div id="menu">
+    <nav class="menu">
+        <a href="data/sites/aboutus.html">About us</a>
+        <a href="data/sites/clans.html">Clans</a>
+        <a href="https://discord.gg/empiresgaming" target="_blank"><i class="fa-brands fa-discord" style="font-size: 32px; margin-right: 8px; color: blue"></i><span style="color:blue;">Discord</span></a>
+    </nav>
+</div>
+
+<div class="welcome">
+
+        <h1 id="line1"></h1>
+        <h2 id="line2" style="margin-top: 5px;"></h2>
+
+    </div>
+</body>
+</html>
+
+<script>
+    // const text = "Welcome to 疟mpires";
+    // let i = 0;
+
+    // function type() {
+    //     if (i< text.length) {
+    //         document.getElementById("type").textContent += text.charAt(i);
+    //         i++;
+    //         setTimeout(type, 80);
+    //     }
+    // }
+    // type();
+
+    const text1 = "Welcome to 疟mpires";
+    const text2 = "Click on links above to learn more about us!";
+    let i = 0;
+    let j = 0;
+
+
+    const line1 = document.getElementById("line1");
+    const line2 = document.getElementById("line2");
+
+    function typeLine1() {
+        if (i < text1.length) {
+            line1.textContent += text1.charAt(i);
+            i++;
+            setTimeout(typeLine1, 80);
+        } else {
+            setTimeout(typeLine2, 300);
+        }
+    }
+
+    function typeLine2() {
+        if (j < text2.length) {
+            line2.textContent += text2.charAt(j);
+            j++;
+            setTimeout(typeLine2, 70);
+        }
+    }
+    
+   typeLine1(); 
+</script>
